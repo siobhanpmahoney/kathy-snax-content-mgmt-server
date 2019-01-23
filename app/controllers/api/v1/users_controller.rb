@@ -6,21 +6,21 @@ class Api::V1::UsersController < ApplicationController
     render json: @users
   end
 
-  # def create
-  #   if !User.find_by(username: user_params["username"])
-  #     @user = User.new(user_params)
-  #     if @user.save
-  #       @token = encode_token(user_id: @user.id) #issues token when user is registered
-  #       render json: @user, status: 201, serializer: nil
-  #     else
-  #       render json: {error:"Error, User not saved"}, status: :unauthorized
-  #     end
-  #   else
-  #     @user = User.find_by(username: user_params["username"])
-  #     render json: @user, status: 201, serializer: nil
-  #     # render json: {user: @user, token: @token}, serialzer: UserSerializer, status: 201
-  #   end
-  # end
+  def create
+
+      @user = User.new(user_params)
+      if @user.save
+        @token = encode_token(user_id: @user.id) #issues token when user is registered
+        render json: @user, status: 201
+      else
+        render json: {error:"Error, User not saved"}, status: :unauthorized
+      end
+    else
+      @user = User.find_by(username: user_params["username"])
+      render json: @user, status: 201
+      # render json: {user: @user, token: @token}, serialzer: UserSerializer, status: 201
+
+  end
 
 
 
@@ -51,6 +51,6 @@ class Api::V1::UsersController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:username, :password)
+    params.require(:user).permit(:username, :password, :password_confirmation)
   end
 end

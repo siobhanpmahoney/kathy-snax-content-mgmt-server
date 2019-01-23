@@ -3,33 +3,55 @@ require 'json'
 
 class ApplicationController < ActionController::API
 
-  private
-
   def encode_token(payload)
-    JWT.encode(payload, secret, algorithm)
+    puts "\n"
+    puts "\n"
+    puts "at app_controller#encode_token, line 9. PAYLOAD: #{payload}"
+    puts "\n"
+    puts "\n"
+    JWT.encode(
+      payload,
+      secret,
+      algorithm
+    )
   end
 
 
-  def login_user(username, password)
-    user = User.find_by(username: username)
-    if user && user.authenticate(password)
-      user
-    else
-      raise AuthError
+def login_user(username, password)
+  puts "\n"
+  puts "\n"
+  puts "at app_controller#login_user, line 23"
+  puts "args:"
+  puts "username #{username}"
+  puts "\n"
+  puts "\n"
+  user = User.find_by(username: username)
+
+  if user && user.authenticate(password)
+    user
+  else
+    raise AuthError
+  end
+
+end
+
+
+
+def decode_token # removed argument since token will always be found in Auth headers
+  puts "\n"
+  puts "\n"
+  puts "at app_controller#decode_token, line 43"
+  puts "\n"
+  puts "\n"
+  if auth_header # ensures token exists in header
+    @token = auth_header.split(' ')[1]
+    begin
+      JWT.decode(@token, secret, true, { algorithm: algorithm })
+    rescue JWT::DecodeError
+      nil
     end
   end
-
-
-  def decode_token # removed argument since token will always be found in Auth headers
-    if auth_header # ensures token exists in header
-      token = auth_header.split(' ')[1]
-      begin
-        JWT.decode(token, secret, true, { algorithm: algorithm })
-      rescue JWT::DecodeError
-        nil
-      end
-    end
-  end
+end
 
 
   def logged_in?
@@ -41,14 +63,20 @@ class ApplicationController < ActionController::API
     render json: {error: "Must be logged in to view content"} unless logged_in?
   end
 
-  def current_user
-    if decode_token() #ensures Authorization token exists
-      user_id = decode_token[0]['user_id'] #[{ "user_id"=>"2" }, { "alg"=>"HS256" }]
-      @user = User.find_by(id: user_id)
-    else
-      nil
+
+    def current_user
+      puts "\n"
+      puts "\n"
+      puts "at app_controller#current_user, line 70"
+      puts "\n"
+      puts "\n"
+      if decode_token() #ensures Authorization token exists
+        user_id = decode_token[0]['user_id'] #[{ "user_id"=>"2" }, { "alg"=>"HS256" }]
+        @user = User.find_by(id: user_id)
+      else
+        nil
+      end
     end
-  end
 
 
   def auth_header
