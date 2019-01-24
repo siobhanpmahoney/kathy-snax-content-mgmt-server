@@ -2,25 +2,44 @@ class Api::V1::AuthController < ApplicationController
   require 'securerandom'
 
   def login
-
-    begin
-      @user = login_user(params[:username], params[:password])
-
-      if @user
-
-        @token = encode_token({ 'user_id': @user.id })
-        render json: {
-          id: @user.id,
-          username: @user.username,
-          token: @token
-        }
-      else
-        render json: { message: 'Invalid username or password' }, status: :unauthorized
-      end
-    rescue AuthError => e
-      render json: { error: e.message }, status: 401
+    
+    user = User.find_by(username: user_params[:username])
+    puts "\n"
+    puts "in auth#login - user: #{user}"
+    if user && user.authenticate(user_params[:password])
+      token = encode_token({ user_id: user.id })
+      puts "\n"
+      puts "in auth#login - user: #{token}"
+      j = { user: user, token: token }
+      puts "\n"
+      puts "in auth#login - json:"
+      puts j
+      render json: { user: user, token: token }, status: :accepted
+    else
+      render json: { message: 'Invalid username or password' }, status: :unauthorized
     end
   end
+
+  # def login
+  #
+  #   begin
+  #     @user = login_user(params[:username], params[:password])
+  #
+  #     if @user
+  #
+  #       @token = encode_token({ 'user_id': @user.id })
+  #       render json: {
+  #         id: @user.id,
+  #         username: @user.username,
+  #         token: @token
+  #       }
+  #     else
+  #       render json: { message: 'Invalid username or password' }, status: :unauthorized
+  #     end
+  #   rescue AuthError => e
+  #     render json: { error: e.message }, status: 401
+  #   end
+  # end
 
 
   def signup
@@ -46,10 +65,9 @@ class Api::V1::AuthController < ApplicationController
 
   def currentUser
 
-    puts "in currentUser, current_user"
-    puts current_user
     @user = current_user
-        byebug
+    puts "\n"
+    puts "in auth#currentUser - @user: #{@user}"
     if @user
       render json: {
         id: @user.id,
