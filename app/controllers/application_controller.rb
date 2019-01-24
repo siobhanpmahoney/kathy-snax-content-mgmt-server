@@ -18,17 +18,10 @@ class ApplicationController < ActionController::API
 
 
 def login_user(username, password)
-  puts "\n"
-  puts "\n"
-  puts "at app_controller#login_user, line 23"
-  puts "args:"
-  puts "username #{username}"
-  puts "\n"
-  puts "\n"
-  user = User.find_by(username: username)
+  @user = User.find_by(username: username)
 
-  if user && user.authenticate(password)
-    user
+  if @user && @user.authenticate(password)
+    @user
   else
     raise AuthError
   end
@@ -38,11 +31,6 @@ end
 
 
 def decode_token # removed argument since token will always be found in Auth headers
-  puts "\n"
-  puts "\n"
-  puts "at app_controller#decode_token, line 43"
-  puts "\n"
-  puts "\n"
   if auth_header # ensures token exists in header
     @token = auth_header.split(' ')[1]
     begin
@@ -65,17 +53,21 @@ end
 
 
     def current_user
-      puts "\n"
-      puts "\n"
-      puts "at app_controller#current_user, line 70"
-      puts "\n"
-      puts "\n"
-      if decode_token() #ensures Authorization token exists
-        user_id = decode_token[0]['user_id'] #[{ "user_id"=>"2" }, { "alg"=>"HS256" }]
-        @user = User.find_by(id: user_id)
-      else
-        nil
-      end
+      puts "in current_user"
+      puts "decode_token"
+      puts decode_token()
+      byebug
+      @current_user ||= User.find_by(id: decode_token().first['user_id'])
+
+
+      # if decode_token() #ensures Authorization token exists
+      #   puts "token decoded"
+      #   user_id = decode_token[0]['user_id'] #[{ "user_id"=>"2" }, { "alg"=>"HS256" }]
+      #   puts "user_id: #{user_id}"
+      #   @current_user = User.find_by(id: user_id)
+      # else
+      #   nil
+      # end
     end
 
 

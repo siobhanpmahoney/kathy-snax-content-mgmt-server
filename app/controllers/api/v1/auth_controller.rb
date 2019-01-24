@@ -2,28 +2,15 @@ class Api::V1::AuthController < ApplicationController
   require 'securerandom'
 
   def login
-    puts "\n"
-    puts "\n"
-    puts "at auth_controller#decode_token, line 6"
-    puts "\n"
-    puts "\n"
+
     begin
       @user = login_user(params[:username], params[:password])
-      puts "user: #{@user}"
-      puts "at auth_controller#decode token, USER = #{@user.id}"
 
       if @user
-        puts "\n"
-        puts "\n"
-        puts "encode token?"
-        
-        puts "\n"
-        puts "\n"
-        puts "\n"
-        puts "\n"
+
         @token = encode_token({ 'user_id': @user.id })
-        puts "@token: #{@token}"
         render json: {
+          id: @user.id,
           username: @user.username,
           token: @token
         }
@@ -38,9 +25,7 @@ class Api::V1::AuthController < ApplicationController
 
   def signup
     @user = User.new(user_params)
-    puts "params"
-    puts params
-    puts "\n"
+
     if @user.save
       begin
         user = login_user(user_params[:username], user_params[:password])
@@ -60,12 +45,12 @@ class Api::V1::AuthController < ApplicationController
 
 
   def currentUser
-    puts "\n"
-    puts "\n"
-    puts "at auth_controller#currentUser, line 57"
-    puts "\n"
-    puts "\n"
-    if user
+
+    puts "in currentUser, current_user"
+    puts current_user
+    @user = current_user
+        byebug
+    if @user
       render json: {
         id: @user.id,
         username: @user.username
